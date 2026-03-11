@@ -17,32 +17,41 @@ library(hms)
 ###############################################################################
 
 # Path to the template workbook
-wb_path <- "C:/Users/dbrown/Oregon/DEQ - Integrated Report 🎉 - IR_2026/Call_for_Data/Submitted Data/Original Files/ODFW/Stan/Updated Submission Files/2023/ContinuousODFW2023_21433193.xlsx"
+wb_path <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/TestTestCopy_Cont_Vol_MFIMW_2023_NFJDWC_Final.xlsx"
 wb <- loadWorkbook(wb_path, isUnzipped = FALSE)
 
 # Folder with logger Excel files
-folder <- "C:/Users/dbrown/Oregon/DEQ - Integrated Report 🎉 - IR_2026/Call_for_Data/Submitted Data/Original Files/ODFW/Stan/All_approved_final_temp_data/All_Approved_Final_2023/Start at 21433193"
+folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV to Template/CSV/CSV"
 
 # Desired output folder for _w_results version
-output_folder <- "C:/Users/dbrown/Oregon/DEQ - Integrated Report 🎉 - IR_2026/Call_for_Data/Submitted Data/Original Files/ODFW/Stan/Updated Submission Files/2023"
-org <- "ODFW_(NOSTORETID)"
+output_folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV to Template/CSV"
+org <- "MIDJOHNDAY_WC"
 
 ###############################################################################
 # Read and process logger files                                               #
+# You may need to comment/uncomment out lines 39/40 and 46/47 for xlsx/csv    #
 ###############################################################################
 
 # Change working directory to the folder of csv files
 setwd(folder)
 
 # Use this section of code to load an entire folder of files
-#raw_files <- list.files(path = folder, pattern = "\\.xlsx$", full.names = TRUE)
-raw_files <- list.files(path = folder, pattern = "\\.csv$", full.names = TRUE) # change to "\\.csv$" if using that file type
+#raw_files <- list.files(path = folder, pattern = "\\.xlsx$", full.names = TRUE) # Use this line if using xlsx files
+raw_files <- list.files(path = folder, pattern = "\\.csv$", full.names = TRUE) # Use this line if using csv files
 skip_log <- c()
+
+# This 
+stop("Answer the prompt after running the next two lines of code, then run the remaining code.")
+header_row <- as.integer(
+  readline(prompt = "Which row contains the column names? Enter 1 or 2: "))
+
+skip_rows <- header_row - 1
 
 raw_data <- map_dfr(raw_files, function(file) {
   message("Reading: ", basename(file))
   tryCatch({
-    data <- suppressWarnings(read_excel(file)) # change to read_csv if using that file type
+    #data <- suppressWarnings(read_excel(file)) # Use this line if using xlsx files
+    data <- suppressWarnings(read_csv(file, skip = skip_rows, locale = locale(encoding = "Windows-1252"))) # Use this line if using csv files
     filename <- tools::file_path_sans_ext(basename(file))
     data <- data %>% mutate(equipID = filename)
     
@@ -69,14 +78,6 @@ if (length(skip_log) > 0) {
   message("✔ Skipped serial numbers written to skipped_serials.txt")
 }
 
-# Add a second to any readings taken at midnight because it causes issues later in the script
-raw_data <- raw_data %>%
-  mutate(DateTime = if_else(
-    format(DateTime, "%H:%M:%S") == "00:00:00",
-    DateTime + seconds(1),
-    DateTime
-  ))
-  
 ###############################################################################
 # Process deployment sheet                                                    #
 ###############################################################################
@@ -109,7 +110,7 @@ temp_columns <- names(raw_data)[grep("^Temp", names(raw_data))]
 datetime_columns <- names(raw_data)[grep("^Date", names(raw_data))] 
 
 data <- raw_data %>%
-  rename(DateTime1 = all_of(datetime_columns[1]), 
+  rename(DateTime1 = all_of(datetime_columns[1]),
          Temp1 = all_of(temp_columns[1])) %>%
   reduce(temp_columns[-1], .init = ., # Iterate through all the temp columns and combine them into Temp1 
          ~ mutate(.x, Temp1 = if_else(is.na(Temp1) & !is.na(.data[[.y]]), .data[[.y]], Temp1))) %>%
@@ -117,6 +118,11 @@ data <- raw_data %>%
          ~ mutate(.x, DateTime1 = if_else(is.na(DateTime1) & !is.na(.data[[.y]]), .data[[.y]], DateTime1))) %>%
   select(DateTime1, Temp1, equipID) %>% # Drop everything besides what's listed in the select statement
   mutate(DateTime1 = str_trim(DateTime1), # trims off extra spaces from DateTime column and formats into datetime
+         DateTime1 = mdy_hms(DateTime1), 
+         DateTime1 = if_else( # this if_else adds a second to any readings taken at midnight
+           format(DateTime1, "%H:%M:%S") == "00:00:00",
+           DateTime1 + seconds(1),
+           DateTime1),
          DateTime1 = ymd_hms(DateTime1),
          equipID = as.double(equipID)) %>%
   filter(!is.na(Temp1)) # removes the blank rows from end of each dataset
