@@ -35,7 +35,8 @@ org <- "ODFW_(NOSTORETID)"
 setwd(folder)
 
 # Use this section of code to load an entire folder of files
-raw_files <- list.files(path = folder, pattern = "\\.xlsx$", full.names = TRUE) # change to "\\.csv$" if using that file type
+#raw_files <- list.files(path = folder, pattern = "\\.xlsx$", full.names = TRUE)
+raw_files <- list.files(path = folder, pattern = "\\.csv$", full.names = TRUE) # change to "\\.csv$" if using that file type
 skip_log <- c()
 
 raw_data <- map_dfr(raw_files, function(file) {
