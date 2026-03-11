@@ -50,7 +50,7 @@ skip_rows <- header_row - 1
 raw_data <- map_dfr(raw_files, function(file) {
   message("Reading: ", basename(file))
   tryCatch({
-    #data <- suppressWarnings(read_excel(file)) # Use this line if using xlsx files
+    #data <- suppressWarnings(read_excel(file, skip = skip_rows)) # Use this line if using xlsx files
     data <- suppressWarnings(read_csv(file, skip = skip_rows, locale = locale(encoding = "Windows-1252"))) # Use this line if using csv files
     filename <- tools::file_path_sans_ext(basename(file))
     data <- data %>% mutate(equipID = filename)
