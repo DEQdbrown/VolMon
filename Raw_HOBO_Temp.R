@@ -27,7 +27,7 @@ folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV 
 output_folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV to Template/CSV"
 org <- "MIDJOHNDAY_WC"
 
-# Input 1 or 2 to tell the script which line the data starts on in the csv/xlsx files
+# Input 1 or 2 in header_row call to tell the script which line the data starts on in the csv/xlsx files
 header_row <- 2
 skip_rows <- header_row - 1
 
@@ -42,21 +42,6 @@ setwd(folder)
 # Use this section of code to load an entire folder of files
 raw_files <- list.files(path = folder, pattern = "\\.(csv|xlsx)$", full.names = TRUE, ignore.case = TRUE) # Use this line if using csv files
 skip_log <- c()
-
-ext <- tools::file_ext(file)
-
-if(ext == "csv") {
-  data <- read_csv(file, skip = skip_rows, locale = locale(encoding = "Windows-1252"))
-} else if (ext == "xlsx") {
-  data <- read_xlsx(file, skip = skip_rows)
-}
-
-# This 
-stop("Answer the prompt after running the next two lines of code, then run the remaining code.")
-header_row <- as.integer(
-  readline(prompt = "Which row contains the column names? Enter 1 or 2: "))
-
-skip_rows <- header_row - 1
 
 raw_data <- map_dfr(raw_files, function(file) {
   message("Reading: ", basename(file))
