@@ -9,19 +9,17 @@
 library(tidyverse)
 library(lubridate)
 library(RODBC) 
+library(odbc) 
 library(readxl)
 library(data.table)
 library(fuzzyjoin)
 library(ggplot2)
 
 # load functions 
-source("//deqlab1/Vol_Data/_Rtools/Grab/3. VolMon_Grab_2022Template_NewTemplate/1. R Processing Scripts/Dan Grab Data Test Files/Format_Template_NewVolMon_dtb.R")
-source("//deqlab1/Vol_Data/_Rtools/Grab/3. VolMon_Grab_2022Template_NewTemplate/1. R Processing Scripts/Dan Grab Data Test Files/Auto_Grade_NewVolMon_dtb.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/Format_Template_NewVolMon_dtb.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/Auto_Grade_NewVolMon_dtb.R")
 ###source("Plots.R") ## Removed for now, we don't typically need plots. KM 10.2023
-source("//deqlab1/Vol_Data/_Rtools/Grab/3. VolMon_Grab_2022Template_NewTemplate/1. R Processing Scripts/Dan Grab Data Test Files/Database_tables_NewVolMon_dtb.R")
-
-#test2 <- read_excel("//deqlab1/Vol_Data/Powder/2024/grab/WorkingCopy_WQM_Grab_2024.xlsx", sheet= "Results") %>% set_names(make.names(colnames(test)))
-#test2<-make.names(colnames(test))
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/Database_tables_NewVolMon_dtb.R")
 
 # set file path for vol data working copy template and enter submission ID
 
@@ -60,11 +58,12 @@ odbcClose(VM2.sql)
 projectinfo <- data |>
   distinct(Characteristic.Name, .keep_all = TRUE) |> 
   mutate(Characteristic.Name = if_else(Characteristic.Name == "Dissolved Oxygen, Saturation", 
-                                       "Dissolved oxygen saturation", Characteristic.Name)) |> # If other AWQMS names don't match the VolMon Database add them here
+                                       "Dissolved oxygen saturation", Characteristic.Name)) |> # If other AWQMS names don't match the VolMon Database add them here. Updating the SQL table with negate the need for this.
   left_join(chars, by = c("Characteristic.Name" = 'Characteristic')) |>
   left_join(methods, by = c("Result.Analytical.Method.ID" = "Code")) |>
   rename(LOQ = 'Reporting.Limit.Value', FieldOrLab = 'Activity.Type', 
-         "Method.Short.Name" = 'Result.Analytical.Method.ID') |>
+         "MethodShortName" = 'Result.Analytical.Method.ID', 'MethodSpeciation' = 'Method.Speciation',
+         'Analytical.Organization' = 'Laboratory.Name') |>
   mutate(Low_QC = NA_real_,
          FieldOrLab = case_when(
            str_detect(FieldOrLab, 'Field') ~ "Field",
@@ -85,17 +84,18 @@ projectinfo <- data |>
            is.na(Low_QC) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 10,
            is.na(Low_QC) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ 20,
            TRUE ~ Low_QC),
-         Method.Short.Name = case_when(
-           is.na(Method.Short.Name) & CharIDText == 'ec'  & FieldOrLab == 'Lab'   ~ 'C24',
-           is.na(Method.Short.Name) & CharIDText == 'do'  & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
-           is.na(Method.Short.Name) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
-           is.na(Method.Short.Name) & CharIDText == 'ph'  & FieldOrLab == 'Field' ~ '150.1',
-           is.na(Method.Short.Name) & CharIDText == 't'   & FieldOrLab == 'Field' ~ '170.1',
-           is.na(Method.Short.Name) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ '180.1',
-           is.na(Method.Short.Name) & CharIDText == 'sc'  & FieldOrLab == 'Field' ~ '120.1',
-           TRUE ~ Method.Short.Name)
+         MethodShortName = case_when(
+           is.na(MethodShortName) & CharIDText == 'ec'  & FieldOrLab == 'Lab'   ~ 'C24',
+           is.na(MethodShortName) & CharIDText == 'do'  & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
+           is.na(MethodShortName) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
+           is.na(MethodShortName) & CharIDText == 'ph'  & FieldOrLab == 'Field' ~ '150.1',
+           is.na(MethodShortName) & CharIDText == 't'   & FieldOrLab == 'Field' ~ '170.1',
+           is.na(MethodShortName) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ '180.1',
+           is.na(MethodShortName) & CharIDText == 'sc'  & FieldOrLab == 'Field' ~ '120.1',
+           TRUE ~ MethodShortName)
          ) |>
-  select(CharID, CharIDText, Characteristic.Name, Method.Short.Name, Result.Unit, FieldOrLab, LOQ, Low_QC)
+  select(CharID, CharIDText, Characteristic.Name, MethodShortName, Result.Unit, 
+         MethodSpeciation, FieldOrLab, Analytical.Organization, LOQ, Low_QC)
   
 #Function to format the data - must confirm that the QC checks are zero - 
 format_data(data)
