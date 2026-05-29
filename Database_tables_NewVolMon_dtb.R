@@ -89,7 +89,7 @@ DB_tables <- function(final_DQL) {
     mutate(RsltStatusID = 7) %>%  # all data goes in as Prelim?
     select(result_id,act_id,CharID,Result,RsltQual,UnitID,MethodID,RsltTypeID,MethodSpeciation,
            AnalyticalLaboratoryID,AnalyticalStartTime,AnalyticalStartTimeZoneID,AnalyticalEndTime,
-           AnalyticalEndTimeZoneID,LabCommentCode,LOQ,LOQ_UnitID,DEQ_ACC,prec_DQL, #OG_ACC,OG_PREC,OG_DQL,
+           AnalyticalEndTimeZoneID,LabCommentCode,LOQ,LOQ_UnitID,DEQ_ACC,prec_DQL, OG_ACC,OG_PREC,OG_DQL,
            BiasValue, prec_val,ORDEQ_DQL,StatisticalBasisID,RsltTimeBasisID,StoretUniqueID,Res_comment,
            DEQ_RsltComment,RsltStatusID) %>%
     rename(ResultIDText = result_id,PrecisionValue = prec_val,DEQ_PREC = prec_DQL,
