@@ -8,9 +8,10 @@ DB_tables <- function(final_DQL) {
   stations <- sqlFetch(VM2.sql, "dbo.tlu_Stations") 
   units <- sqlFetch(VM2.sql, "dbo.tlu_units")
   context <- sqlFetch(VM2.sql, "dbo.tlu_Context")
-  method <- sqlFetch(VM2.sql, "dbo.tlu_Method")
+  #method <- sqlFetch(VM2.sql, "dbo.tlu_Method")
   chars <- sqlFetch(VM2.sql,"dbo.tlu_Characteristic")
-  type <- sqlFetch(VM2.sql,"dbo.tlu_Type") %>% select(TypeID,TypeIDText) 
+  type <- sqlFetch(VM2.sql,"dbo.tlu_Type") %>% 
+    select(TypeID,TypeIDText) 
  
   ### Add columns to final_DQL to match SQL tables #### 
   final_DQL <- final_DQL %>%
@@ -19,7 +20,7 @@ DB_tables <- function(final_DQL) {
            Org_Comment = NA_character_,
            OG_ACC=NA_character_,
            OG_PREC=NA_character_,
-           OG_DQL=NA_character_,)
+           OG_DQL=NA_character_)
   
   #### t_ActGrp ####
   ActGroup <- final_DQL %>%
@@ -65,11 +66,11 @@ DB_tables <- function(final_DQL) {
   
   #### t_Result ####
   res_t <- final_DQL  %>% 
-    select(result_id,act_id,LASAR_ID,CharIDText,Result,RsltQual,'Method Short Name','MethodSpeciation',UNITS,
-           LOQ,FieldOrLab,Res_comment,OG_ACC,OG_PREC,OG_DQL,final_DQL) %>%
+    select(result_id,act_id,LASAR_ID,CharIDText,Result,RsltQual,MethodShortName,Result.Unit,MethodSpeciation,
+           LOQ,FieldOrLab,Res_comment,OG_ACC,OG_PREC,OG_DQL,ORDEQ_DQL) %>% 
     left_join(chars, by = 'CharIDText') %>%
-    left_join(units, by = c('UNITS' = 'UnitIdText')) %>%
-    left_join(method, by = c('Method Short Name' = 'ShortName')) %>%
+    left_join(units, by = c('Result.Unit' = 'UnitIdText')) %>%
+    left_join(methods, by = c('MethodShortName' = 'ShortName')) %>%
     #left_join(QC_act, by = c('act_id' = 'ActivityIDText')) %>%  # this reduces having to pull in the whole activity table 
     mutate(RsltTypeID = 19, # have to account for nondetect in ?
            AnalyticalLaboratoryID = NA,  # will these be in the template if FieldOrLab = lab?
@@ -86,14 +87,14 @@ DB_tables <- function(final_DQL) {
            DEQ_RsltComment = NA) %>%
     left_join(prec_grade, by = 'result_id') %>%
     mutate(RsltStatusID = 7) %>%  # all data goes in as Prelim?
-    select(result_id,act_id,CharID,Result,RsltQual,UnitID,MethodID,MethodSpeciation,RsltTypeID, 
+    select(result_id,act_id,CharID,Result,RsltQual,UnitID,MethodID,RsltTypeID,MethodSpeciation,
            AnalyticalLaboratoryID,AnalyticalStartTime,AnalyticalStartTimeZoneID,AnalyticalEndTime,
-           AnalyticalEndTimeZoneID,LabCommentCode,LOQ,LOQ_UnitID,OG_ACC,OG_PREC,OG_DQL,DEQ_ACC,prec_DQL,
-           BiasValue, prec_val,final_DQL,StatisticalBasisID,RsltTimeBasisID,StoretUniqueID,Res_comment,
+           AnalyticalEndTimeZoneID,LabCommentCode,LOQ,LOQ_UnitID,DEQ_ACC,prec_DQL, #OG_ACC,OG_PREC,OG_DQL,
+           BiasValue, prec_val,ORDEQ_DQL,StatisticalBasisID,RsltTimeBasisID,StoretUniqueID,Res_comment,
            DEQ_RsltComment,RsltStatusID) %>%
-    rename(ResultIDText = result_id,PrecisionValue = prec_val,DEQ_PREC = prec_DQL,ORDEQ_DQL = final_DQL,
-           Org_RsltComment = Res_comment, StoretQualID = StoretUniqueID,QCorigACC = OG_ACC, QCorigPREC = OG_PREC,
-           QCorigDQL = OG_DQL)
+    rename(ResultIDText = result_id,PrecisionValue = prec_val,DEQ_PREC = prec_DQL,
+           QCorigACC = OG_ACC, QCorigPREC = OG_PREC,QCorigDQL = OG_DQL,
+           Org_RsltComment = Res_comment, StoretQualID = StoretUniqueID) #
   
   .GlobalEnv$res_t <- res_t
   write.csv(res_t, "res_t.csv")
