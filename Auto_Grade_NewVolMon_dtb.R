@@ -28,14 +28,14 @@ odbcClose(VM2.sql)
 
 ### This step determines if RPD or absolute difference should be used based the Low Level QC value
 {QC_calc_M <- res %>% 
-  select(act_group_stn,LASAR_ID, DateTime,Result.Value,CharIDText,sample_type,act_id,Low_QC) %>%
-  left_join(chars, by = 'CharIDText') %>% # join char table to get charid
+  select(act_group_stn,LASAR_ID, DateTime,Result.Value,CharID,CharIDText,sample_type,act_id,Low_QC) %>%
+  #left_join(chars, by = 'CharIDText') %>% # join char table to get charid
   left_join(QCcrit, by = c('CharID'= 'charid','CharIDText'='charidText')) %>% 
   filter(sample_type == 'sample') %>%  ## Commenting out 10/16/23. This line was causing issues with dups. KM.
   group_by(act_group_stn,CharIDText) %>% 
   mutate(n = n(),
          USE = case_when(n>1 & Result.Value < Low_QC & QCcalc == 'RPD' ~ 0, #without Low_QC on ProjectInfo tab res and res_t have a difference
-                         n>1 & Result.Value >= Low_QC & QCcalc == 'AbsDiff' ~ 0, ## Added = to code to indicate that AbsDiff should not be used if Result is >= LowQC DTB 071425
+                         n>1 & Result.Value >= Low_QC & QCcalc == 'AbsDiff' ~ 0, ## Added = to code to indicate that AbsDiff should not be used if Result is >= Low_QC DTB 071425
                          TRUE ~ 1)) %>% 
   filter(USE == 1) %>% 
   select(act_group_stn,CharIDText,QCcalc,DQLA,DQLB,USE) 
@@ -178,7 +178,8 @@ Prelim_DQL_All <- Prelim_DQL_nonMixed }}
                           percen_10th = quantile(Result.Value, probs = .10), 
                           percen_90th = quantile(Result.Value, probs = .90),
                           percen_95th = quantile(Result.Value, probs = .95))
-station_char_percen <- Prelim_DQL_All%>%
+
+station_char_percen <- Prelim_DQL_All %>%
                        group_by(LASAR_ID, CharIDText) %>% 
                        summarise(S_percen_5th = quantile(Result.Value, probs = .05), 
                        S_percen_95th = quantile(Result.Value, probs = .95))
@@ -241,7 +242,7 @@ anom_res_sum = res_anom %>%
 
 final_DQL <- Prelim_DQL_All %>%
   left_join(anom_res_sum, by = "result_id") %>%
-           mutate(final_DQL = case_when(prelim_dql < "C" & anom_amb_99 > 0 ~ "Anom", 
+           mutate(ORDEQ_DQL = case_when(prelim_dql < "C" & anom_amb_99 > 0 ~ "Anom", 
                                         prelim_dql < "C" & anom_sub_95 > 0 & anom_amb_95 > 0 ~ "Anom",
                                         prelim_dql < "C" & anom_amb_95 > 0 & anom_WQS > 0 ~ "Anom",
                                         prelim_dql < "C" & anom_WQS > 0 ~ "Anom",
