@@ -10,8 +10,6 @@ library(readxl)
 library(data.table)
 
 ### connect to VOLMON2 ###
-### attempted to use DBI, but got an error when trying to bring in submission and type tables  
-### google search looks like it is related to the use of nvarchar(max) in these tables 
 format_data <- function(data){
 ### pulls tables from SQL VolMon2 db - this requires an ODBC connection to VOLMON2 on DEQLEAD-LIMS
 VM2.sql <- odbcConnect("VolMon2") 
