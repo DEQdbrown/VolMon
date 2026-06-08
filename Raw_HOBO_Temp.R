@@ -17,15 +17,15 @@ library(hms)
 ###############################################################################
 
 # Path to the template workbook
-wb_path <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/TestTestCopy_Cont_Vol_MFIMW_2023_NFJDWC_Final.xlsx"
+wb_path <- "//deqlab1/Vol_Data/North Fork John Day/2025_MF_submitted_April2026/WorkingCopy_WQM-Cont_2025_MFJD_IMW_FILLED_updated - test.xlsx"
 wb <- loadWorkbook(wb_path, isUnzipped = FALSE)
 
 # Folder with logger Excel files
-folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV to Template/CSV/CSV"
+folder <- "//deqlab1/Vol_Data/North Fork John Day/2025_MF_submitted_April2026/DEQ_2025_IMW-working-test"
 
 # Desired output folder for _w_results version
-output_folder <- "//deqlab1/Vol_Data/North Fork John Day/2023_MF_submitted_May2024/CSV to Template/CSV"
-org <- "MIDJOHNDAY_WC"
+output_folder <- "//deqlab1/Vol_Data/North Fork John Day/2025_MF_submitted_April2026"
+org <- "NFJOHNDAY_WC"
 
 # Input 1 or 2 in header_row call to tell the script which line the data starts on in the csv/xlsx files
 header_row <- 2
@@ -114,12 +114,18 @@ data <- raw_data %>%
          ~ mutate(.x, DateTime1 = if_else(is.na(DateTime1) & !is.na(.data[[.y]]), .data[[.y]], DateTime1))) %>%
   select(DateTime1, Temp1, equipID) %>% # Drop everything besides what's listed in the select statement
   mutate(DateTime1 = str_trim(DateTime1), # trims off extra spaces from DateTime column and formats into datetime
-         DateTime1 = mdy_hms(DateTime1), 
+         DateTime1 = parse_date_time(DateTime1, orders = c( #corrects for different datetime formats that might appear in CSV files
+           "mdy IMS p",  # 11/07/24 02:00:00 PM
+           "mdY IMS p",  # 11/07/2024 02:00:00 PM
+           "mdy HM",     # 11/7/2024 14:00
+           "mdY HM",     # 11/07/2024 14:00
+           "mdy HMS",    # 11/7/2024 14:00:00
+           "mdY HMS")),  # 11/07/2024 14:00:00 
          DateTime1 = if_else( # this if_else adds a second to any readings taken at midnight
            format(DateTime1, "%H:%M:%S") == "00:00:00",
            DateTime1 + seconds(1),
            DateTime1),
-         DateTime1 = ymd_hms(DateTime1),
+         #DateTime1 = ymd_hms(DateTime1),
          equipID = as.double(equipID)) %>%
   filter(!is.na(Temp1)) # removes the blank rows from end of each dataset
 
