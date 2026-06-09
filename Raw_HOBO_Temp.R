@@ -17,7 +17,7 @@ library(hms)
 ###############################################################################
 
 # Path to the template workbook
-wb_path <- "//deqlab1/Vol_Data/North Fork John Day/2025_MF_submitted_April2026/WorkingCopy_WQM-Cont_2025_MFJD_IMW_FILLED_updated - test.xlsx"
+wb_path <- "//deqlab1/Vol_Data/North Fork John Day/2025_MF_submitted_April2026/WorkingCopy_WQM-Cont_2025_MFJD_IMW_FILLED_updated - test - AOK.xlsx"
 wb <- loadWorkbook(wb_path, isUnzipped = FALSE)
 
 # Folder with logger Excel files
@@ -76,12 +76,18 @@ if (length(skip_log) > 0) {
 
 ###############################################################################
 # Process deployment sheet                                                    #
+# Check the version number of the template used before running this section   #
+# of code. If using Version 2.0 or newer, include lines 89-90. If using an    #
+# older version, include lines 86-88.                                         #
 ###############################################################################
 
 deploy <- readWorkbook(wb, sheet = "Deployment") %>%
-  rename(equipID = "Equipment.ID.#", MLocID = "Monitoring.Location.ID",
+  rename_with(~ str_remove_all(.x, "[\\^\\*]")) |> #These lines remove the ^ and * from the new template's column headers, so the script will run correctly
+  rename(equipID = "Equipment.ID.#", MLocID = "Monitoring.Location.ID",  
          startdate = "Deployment.Start.Date", enddate = "Deployment.End.Date",
          starttime = "Deployment.Start.Time", endtime = "Deployment.End.Time") %>%
+  # rename(equipID = "Equipment.ID", MLocID = "Monitoring.Location.ID", startdate = "Start.Date", 
+  #        enddate = "End.Date",starttime = "Start.Time", endtime = "End.Time") %>%
   mutate(equipID = as.numeric(equipID),
          startdate = as.Date(startdate, origin = "1899-12-30"),
          #starttime = trimws(as.character('Deployment.Start.Time')),
