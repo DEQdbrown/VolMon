@@ -1,9 +1,9 @@
 ###                                                                          ###
-### This query pulls 10 years of data from AWQMS and calculates the 1st and  ###
-### 99th percentile for each parameter. This is used to determine outliers   ###
-### during the audit period. Since the script pulls 10 years of data it      ###
-### takes close to an hour to run, so be prepared to wait. This pull only    ###
-### needs to be run once a year.                                             ###
+### This query pulls 20 years of data from AWQMS and calculates the 1st,     ###
+### 5th, 95th and 99th percentile for each parameter. These are used to      ###
+### determine anomalies during grab data review. This script only needs to   ###
+### be run once every five years, so check the date on the most recent file  ###
+### before running again.                                                    ###
 ###                                                                          ###
 ### This script was adapted from Travis Pritchard's IR duplicate script.     ###
 ### Run line 13 if you have never installed the AWQMSdata package before.    ###
@@ -19,6 +19,8 @@ library(AWQMSdata)
 library(lubridate)
 library(readxl)
 library(openxlsx)
+library(odbc)
+library(RODBC)
 
 ### Disable scientific notation
 options(scipen = 999999)
@@ -28,7 +30,7 @@ setwd("//deqlab1/Assessment/AWQMS/Validation")
 
 ### Set the data window by changing these dates
 End_Date <- Sys.Date()
-Start_Date <- End_Date - years(10)
+Start_Date <- End_Date - years(20)
 
 ### Pull in list of normalized units, parameterUIDs, and common names
 NormUnits <- read.xlsx("//deqlab1/Assessment/AWQMS/Validation/NormalizedUnits.xlsx")
@@ -37,8 +39,9 @@ NormUnits <- read.xlsx("//deqlab1/Assessment/AWQMS/Validation/NormalizedUnits.xl
 source("https://raw.githubusercontent.com/DEQdbrown/AWQMS_Audit/main/FUNCTION_convert_units.R")
 
 ### Pull all data from AWQMS for the last 10 years
-All_Proj_Data <- AWQMS_Data(startdate = Start_Date, enddate = End_Date, filterQC = FALSE) %>% 
+All_Proj_Data <- AWQMS_Data(startdate = Start_Date, enddate = End_Date, project = 'Surface Water Ambient Monitoring', filterQC = FALSE) %>% 
   mutate(SampleStartDate = as.Date(SampleStartDate, format = "%Y-%m-%d")) 
+
 
 ### Filter out Unknown Projects, non-detect results, and QA samples
 Filt_Proj_Data <- All_Proj_Data %>%
@@ -47,8 +50,11 @@ Filt_Proj_Data <- All_Proj_Data %>%
          Result_status != 'Rejected', # remove rejected data
          !str_detect(Activity_Type, 'Blank|Spike')) %>% # remove blanks and matrix spikes
   mutate(Result_Unit = str_replace(Result_Unit, "/L", "/l"),
-         Result_Unit = str_replace(Result_Unit, "mL", "ml"))
-  
+         Result_Unit = str_replace(Result_Unit, "mL", "ml")) |>
+  filter(!MLocID %in% c('10332-ORDEQ', '10339-ORDEQ', '10344-ORDEQ', "10350-ORDEQ", # this removes the Willamette mainstem and Columbia sites from the calculation
+                        '10352-ORDEQ', '10355-ORDEQ', '10359-ORDEQ', '10555-ORDEQ', # large rivers have slightly different water chemistry, so including them may
+                        '10611-ORDEQ', '10616-ORDEQ'))                              # misrepresent the conditions likely to occur in VolMon size streams.
+
 # This snippet isn't necessary to run, but can be helpful if needed. It is more informative if lines 43-48 have been run 
 # Count_Param <- All_Proj_Data %>%
 #   group_by(SampleMedia, chr_uid, Char_Name, Unit_UID) %>% # group data by these four columns
@@ -90,40 +96,27 @@ Converted_Data <- Filt_Proj_Data %>%
   filter(!is.na(Result_Unit)) %>% # remove NAs from Result_Unit column
   filter(Statistical_Base != "Delta" | is.na(Statistical_Base)) # filters out Delta and NA values from the statistical base column
    
-LeachInflu_Data <- Filt_Proj_Data %>%
-  left_join(NormUnits, c('SampleMedia', 'chr_uid', 'Char_Name', 'Result_Unit', 'Unit_UID')) %>% 
-  filter(str_detect(SampleSubmedia, 'Leachate|Influent')) %>%
-  convert_units(unit_col = 'Unit_UID', pref_unit_col = 'Pref_Unit_UID', 
-                result_col = 'Result_Numeric') %>% 
-  relocate(c(Conv_Result, Preferred_Unit, Pref_Unit_UID), 
-           .before = ResultCondName) %>% 
-  filter(!is.na(Result_Unit)) %>% 
-  filter(Statistical_Base != "Delta" | is.na(Statistical_Base)) 
-
 ### Calculate percentiles for a majority of data and leachate/influent data separately
-MajorityPerc <- Converted_Data %>%
-  mutate(Char_Speciation = as.character(Char_Speciation),
-         Sample_Fraction = as.character(Sample_Fraction),
-         Statistical_Base = as.character(Statistical_Base)) %>% # ensures that these three columns are characters
-  group_by(SampleMedia, ParamUID, Char_Speciation, Sample_Fraction, 
+Percentiles <- Converted_Data %>%
+  mutate(
+    Char_Speciation = case_when(
+      is.na(Char_Speciation) ~ "None",
+      Char_Speciation == "None" ~ "None",
+      TRUE ~ as.character(Char_Speciation)),
+    Sample_Fraction = case_when(
+      str_detect(Char_Name, 'Dissolved') & is.na(Sample_Fraction) ~ "Dissolved",
+      is.na(Sample_Fraction) ~ "None",
+      TRUE ~ as.character(Sample_Fraction)),
+    Statistical_Base = as.character(Statistical_Base)) %>% # ensures that these three columns are characters
+  group_by(SampleMedia, Char_Name, Char_Speciation, Sample_Fraction, 
            Statistical_Base, Preferred_Unit) %>% # groups data by these six columns
   summarise(
-    p01 = quantile(Conv_Result, probs = 0.01, na.rm = TRUE), 
-    p99 = quantile(Conv_Result, probs = 0.99, na.rm = TRUE)) %>% # calculates the 1st and 99th percentiles
-  mutate(SubMedia = if_else(SampleMedia == 'Water',"NonLeach",NA))
+    amb01L = quantile(Conv_Result, probs = 0.01, na.rm = TRUE),
+    amb05L = quantile(Conv_Result, probs = 0.05, na.rm = TRUE),
+    amb95U = quantile(Conv_Result, probs = 0.95, na.rm = TRUE),
+    amb99U = quantile(Conv_Result, probs = 0.99, na.rm = TRUE)) # calculates the 1st, 5th, 95th and 99th percentiles
+ 
+# ### Combine Data and write the file to Excel
+# Percentiles <- bind_rows(MajorityPerc, LeachPerc)
 
-LeachPerc <- LeachInflu_Data %>%
-  mutate(Char_Speciation = as.character(Char_Speciation),
-         Sample_Fraction = as.character(Sample_Fraction),
-         Statistical_Base = as.character(Statistical_Base)) %>% 
-  group_by(SampleMedia, ParamUID, Char_Speciation, Sample_Fraction, 
-           Statistical_Base, Preferred_Unit) %>% 
-  summarise(
-    p01 = quantile(Conv_Result, probs = 0.01, na.rm = TRUE), 
-    p99 = quantile(Conv_Result, probs = 0.99, na.rm = TRUE)) %>%
-  mutate(SubMedia = if_else(SampleMedia == 'Water',"Leach",NA))
-
-### Combine Data and write the file to Excel
-Percentiles <- bind_rows(MajorityPerc, LeachPerc)
-
-write.xlsx(Percentiles, str_glue("OutlierPercentiles_{End_Date}.xlsx"))
+write.xlsx(Percentiles, str_glue("VolMon_AnomPercentiles_{End_Date}.xlsx"))
