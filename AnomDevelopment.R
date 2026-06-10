@@ -3,11 +3,12 @@
 ### 5th, 95th and 99th percentile for each parameter. These are used to      ###
 ### determine anomalies during grab data review. This script only needs to   ###
 ### be run once every five years, so check the date on the most recent file  ###
-### before running again.                                                    ###
+### before running again. Calculated values should be used to update the     ###
+### AnomCrit table in the VolMon database.                                   ###
 ###                                                                          ###
 ### This script was adapted from Travis Pritchard's IR duplicate script.     ###
-### Run line 13 if you have never installed the AWQMSdata package before.    ###
-### Run line 14 periodically to capture updates to the AWQMSdata pacakage.   ###
+### Run line 14 if you have never installed the AWQMSdata package before.    ###
+### Run line 15 periodically to capture updates to the AWQMSdata pacakage.   ###
 ###                                                                          ###
 
 #install.packages("devtools")
