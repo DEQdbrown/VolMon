@@ -101,7 +101,14 @@ res$Result.Value <- as.numeric(as.character(res$Result.Value)) # Makes sure that
 ### batching error 
 bad_batch <- res %>%
              filter(act_group == 'ERROR')
-             
+
+# check for results below the LOQ
+CHECK_BelowLOQ <- res |>
+  mutate(BLLOQ = case_when(Result.Value >= LOQ ~ 0,
+                           Result.Value < LOQ ~ 1)) |>
+  filter(BLLOQ == 1) |>
+  select(LASAR_ID, DateTime,Characteristic.Name,sample_type, Result.Value, LOQ)
+
 # check for redundant results (same location, sample date/time, QC type, and results)
 redundant_result <-res %>% 
               group_by(act_group_stn,LASAR_ID,DateTime,CharIDText,sample_type,Result.Value) %>%   
@@ -122,6 +129,7 @@ name_check <- res %>%
               filter(is.na('CharID')) }
 
 .GlobalEnv$res <- res
+.GlobalEnv$CHECK_BelowLOQ <- CHECK_BelowLOQ
 .GlobalEnv$bad_batch <- bad_batch
 .GlobalEnv$redundant_result <- redundant_result
 .GlobalEnv$redundant_act_char <- redundant_act_char
