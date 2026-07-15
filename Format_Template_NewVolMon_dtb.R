@@ -99,7 +99,7 @@ res$Result.Value <- as.numeric(as.character(res$Result.Value)) # Makes sure that
 #### QC checks for char and duplicates#### 
 ### These will likely need to  be corrected in the WorkingFile 
 ### batching error 
-bad_batch <- res %>%
+CHECK_bad_batch <- res %>%
              filter(act_group == 'ERROR')
 
 # check for results below the LOQ
@@ -110,30 +110,30 @@ CHECK_BelowLOQ <- res |>
   select(LASAR_ID, DateTime,Characteristic.Name,sample_type, Result.Value, LOQ)
 
 # check for redundant results (same location, sample date/time, QC type, and results)
-redundant_result <-res %>% 
+CHECK_redundant_result <-res %>% 
               group_by(act_group_stn,LASAR_ID,DateTime,CharIDText,sample_type,Result.Value) %>%   
               mutate(dup_res = ifelse(n() > 1, 1, 0)) %>%
               ungroup() %>% 
               filter(dup_res == 1) 
 
 # check for duplicate location, sample date/time, QC type, with different results 
-redundant_act_char <- res %>% # can we call this RedundantActRt? # I wonder if these can be flagged with anomalies?
+CHECK_redundant_act_char <- res %>% # can we call this RedundantActRt? # I wonder if these can be flagged with anomalies?
                   group_by(act_group_stn,LASAR_ID,DateTime,CharIDText,sample_type) %>% 
                   mutate(dup_res = ifelse(n() > 1, 1, 0)) %>%
                   ungroup() %>% 
                   filter(dup_res == 1) 
 
 # verify charIDtext in characteristic table  - should be zero  
-name_check <- res %>% 
+CHECK_names <- res %>% 
               left_join(chars, by = 'CharIDText') %>% 
               filter(is.na('CharID')) }
 
 .GlobalEnv$res <- res
 .GlobalEnv$CHECK_BelowLOQ <- CHECK_BelowLOQ
-.GlobalEnv$bad_batch <- bad_batch
-.GlobalEnv$redundant_result <- redundant_result
-.GlobalEnv$redundant_act_char <- redundant_act_char
-.GlobalEnv$name_check <- name_check}
+.GlobalEnv$CHECK_bad_batch <- CHECK_bad_batch
+.GlobalEnv$CHECK_redundant_result <- CHECK_redundant_result
+.GlobalEnv$CHECK_redundant_act_char <- CHECK_redundant_act_char
+.GlobalEnv$CHECK_name_check <- CHECK_name_check}
 
 ## STUFF STEVE ADDED # LAM I don't understand this 
 # may want to have something to see if there are data fields missing from the project info if this becomes automated.
