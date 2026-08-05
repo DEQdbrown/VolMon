@@ -8,7 +8,7 @@ library(tidyverse)
 library(odeqmloctools)
 library(openxlsx)
 
-#Analyst Name
+#Update these to match the dataset you're working on and where you want the data to be pulled from and exported to
 analyst <- "Liz B"
 
 setwd("//deqlab1/Vol_Data/WallaWalla/2024")
@@ -21,20 +21,19 @@ xlsx_pre_check_output <- "Wallawalla24_PRECHECK.xlsx"
 shiny_output <- "WallaWalla24_SHINY_CDR.Rdata"
 xlsx_output <- "WallaWalla24_output.xlsx"
 
-#changelog output
 changelog <-  'WallaWalla_changelog'
 
-
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_audit_volmon.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_deploy_volmon.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_deploy_volmon_export.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_deploy_volmon_forexport.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_prepost_volmon.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/cols_projects_volmon.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/contin_export_volmon_v2_1.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/contin_import_volmon_v2.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/mloc_col_names_volmon.R")
-source("//deqlab1/Vol_Data/WallaWalla/2024/R/R Scripts/update_deploy_volmon.R")
+# Read in the functions necessary for this script to run
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_audit_volmon.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_export.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_forexport.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_prepost_volmon.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_projects_volmon.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_export_volmon_v2_1.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v2.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/mloc_col_names_volmon.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/update_deploy_volmon.R")
 
 
 #- Import the Data -------------------------------------------------------------
