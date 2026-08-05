@@ -13,7 +13,7 @@ analyst <- "Liz B"
 
 setwd("//deqlab1/Vol_Data/WallaWalla/2024")
 
-xlsx_input <- "WallWalla24_output_original.xlsx"
+xlsx_input <- "WorkingCopy_WWBWC_HydroMon_2024.xlsx"
 
 output_dir <-"//deqlab1/Vol_Data/WallaWalla/2024/R"
 
@@ -328,14 +328,8 @@ save(shiny_list, file=shiny_output)
 # Launch Shiny app for further review.
 odeqcdr::launch_shiny()
 
-#- Make DQL and Status edits based on Shiny Review------------------------------
-# Updates Result Status ID also
-# This section should be structured like this:
-
-# #######################################################################################################################
-# #######################################################################################################################
-# 
-#
+#- Make DQL and status edits based on Shiny Review------------------------------
+# If no edits needed run the blank table below, and skip to the audit_review
 
 result_review <- tibble(
   revision_id     = character(), # copy/paste from Shiny (i.e., [32408-ORDEQ - Caton - Chlorophyll a (probe relative fluorescence)]: 2116:10740)
@@ -383,18 +377,9 @@ for(i in seq_len(nrow(result_review))) {
   
 }
 
-# Included in the workbook below
-# result_review_xlsx <- result_review |>
-#   select(-rds_rows)
-# 
-# writexl::write_xlsx(result_review_xlsx, path=paste0(output_dir, "/result_review_", Sys.Date(), ".xlsx"),
-#                     format_headers=TRUE)
 
-# Might not be needed, if when making edits after the fact the output file is loaded
-# result_review_rds <- result_review |>
-#   select(rds_rows, new_qualifier, review_comment)
-# 
-# saveRDS(result_review_rds, file.path(output_dir, "result_review.rds"))
+#- Make DQL and status edits to the audits based on Shiny Review------------------------------
+# If no edits needed, run the blank table below, and skip to the No Edits Section
 
 audit_review <- tibble(
   revision_id     = character(), # copy/paste from shiny
@@ -430,15 +415,16 @@ audit_review <- bind_rows(
          review_datetime = with_tz(Sys.time(), tzone = "America/Los_Angeles")),
 )
 
-# df4.audits.dql <- df3.audits.dql %>%
-#   odeqcdr::dql_update(rows = c(152), "B", "Original audit associated with result collected after logger retrieved, audit off by 60 minutes") %>%
-#   odeqcdr::dql_update(rows = c(155), "A", "Original audit associated with result collected after logger retrieved") %>%
-#   odeqcdr::dql_update(rows = c(158), "B", "Original audit associated with result collected after logger retrieved, audit off by 45 minutes")%>%
-#   odeqcdr::dql_update(rows = c(112), "A", "") %>% #LB corrected audit pair to 2024-04-17 09:15 PDT
-#   odeqcdr::dql_update(rows = c(149), "B", "") %>% #LB corrected audit pair to 2024-11-06 13:00 PST
-#   odeqcdr::dql_update(rows = c(143), "B", "") %>% #LB corrected audit pair to 2024-11-06 14:15 PST
-#   odeqcdr::dql_update(rows = c(147), "B", "") %>% #LB corrected audit pair to 2024-11-06 12:45 PST
-#   odeqcdr::dql_update(rows = c(139), "B", "")  #LB corrected audit pair to 2024-11-06 13:30 PST
+for(i in seq_len(nrow(audit_review))) {
+  
+  df4.audits.dql <- odeqcdr::dql_update(
+    df4.audits.dql,
+    rows    = result_review$rds_rows[[i]],
+    DQL     = result_review$new_qualifier[i],
+    comment = result_review$review_comment[i]
+  )
+  
+}
 
 # Create Workbook for DQL changes
 review_log <- createWorkbook()
@@ -454,11 +440,13 @@ writeData(review_log, "Audits", audit_review)
 # Save workbook
 saveWorkbook(
   review_log, file = paste0(output_dir, "/review_log_", Sys.Date(), ".xlsx"), overwrite = TRUE)
-#######################################################################################################################
+######################################################################################################################
+#- No Edits Needed
+# skip if edits made above
 
 # If no edits are required:
-#df5.results <- df4.results
-#df4.audits.dql <- df3.audits.dql
+df5.results <- df4.results
+df4.audits.dql <- df3.audits.dql
 
 #######################################################################################################################
 #######################################################################################################################
