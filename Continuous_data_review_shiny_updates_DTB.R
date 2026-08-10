@@ -251,8 +251,8 @@ df3.results$accDQL <- odeqcdr::dql_accuracy(prepost=df3.prepost, results=df3.res
 
 #- Grade Audits ----------------------------------------------------------------
 
-df3.results$precDQL <- dql_precision(audits=df3.audits, results=df3.results, deployment=df1.deployment)
-df3.audits.dql <- dql_precision(audits=df3.audits, results=df3.results, deployment=df1.deployment,
+df3.results$precDQL <- odeqcdr::dql_precision(audits=df3.audits, results=df3.results, deployment=df1.deployment)
+df3.audits.dql <- odeqcdr::dql_precision(audits=df3.audits, results=df3.results, deployment=df1.deployment,
                                          audits_only = TRUE)
 #- Final DQL -------------------------------------------------------------------
 
