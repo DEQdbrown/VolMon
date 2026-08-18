@@ -133,7 +133,7 @@ CHECK_names <- res %>%
 .GlobalEnv$CHECK_bad_batch <- CHECK_bad_batch
 .GlobalEnv$CHECK_redundant_result <- CHECK_redundant_result
 .GlobalEnv$CHECK_redundant_act_char <- CHECK_redundant_act_char
-.GlobalEnv$CHECK_name_check <- CHECK_name_check}
+.GlobalEnv$CHECK_names <- CHECK_names}
 
 ## STUFF STEVE ADDED # LAM I don't understand this 
 # may want to have something to see if there are data fields missing from the project info if this becomes automated.
