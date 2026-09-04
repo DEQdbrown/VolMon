@@ -24,11 +24,11 @@ source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/Datab
 # set file path for vol data working copy template and enter submission ID
 
 ###### Set Working Directory, working path,  and Submission ID ###########
-setwd("//deqlab1/Vol_Data/Powder/2024/grab/R") ##### change this each time!!!!!!!!!!!!!!
+setwd("//deqlab1/Vol_Data/WallowaSWCD/2024/Wallowa sub-basin/grab/R") ##### change this each time!!!!!!!!!!!!!!
 
-data_path <- "//deqlab1/Vol_Data/Powder/2024/grab/WorkingCopy_WQM-Grab_2024_dtb.xlsx"
+data_path <- "//deqlab1/Vol_Data/WallowaSWCD/2024/Wallowa sub-basin/grab/WorkingCopy_2024_Wallowa_WQM-Grab.xlsx"
 
-sub_id <- 305
+sub_id <- 339
 
 # bring in the data tab of the working copy 
 data <- read_excel(data_path,sheet = "Results") |>
@@ -85,13 +85,13 @@ projectinfo <- data |>
            is.na(Low_QC) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ 20,
            TRUE ~ Low_QC),
          MethodShortName = case_when(
-           is.na(MethodShortName) & CharIDText == 'ec'  & FieldOrLab == 'Lab'   ~ 'C24',
-           is.na(MethodShortName) & CharIDText == 'do'  & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
-           is.na(MethodShortName) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 'NFM6.2.1-LUM',
-           is.na(MethodShortName) & CharIDText == 'ph'  & FieldOrLab == 'Field' ~ '150.1',
-           is.na(MethodShortName) & CharIDText == 't'   & FieldOrLab == 'Field' ~ '170.1',
-           is.na(MethodShortName) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ '180.1',
-           is.na(MethodShortName) & CharIDText == 'sc'  & FieldOrLab == 'Field' ~ '120.1',
+           is.na(MethodShortName) & CharIDText == 'ec'  & FieldOrLab == 'Lab'   ~ 'FB-C24',
+           is.na(MethodShortName) & CharIDText == 'do'  & FieldOrLab == 'Field' ~ 'DO-NFM6.2.1-Lum',
+           is.na(MethodShortName) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 'DO-NFM6.2.1-Lum',
+           is.na(MethodShortName) & CharIDText == 'ph'  & FieldOrLab == 'Field' ~ 'pH-150.1',
+           is.na(MethodShortName) & CharIDText == 't'   & FieldOrLab == 'Field' ~ 'T-170.1',
+           is.na(MethodShortName) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ 'TB-180.1',
+           is.na(MethodShortName) & CharIDText == 'sc'  & FieldOrLab == 'Field' ~ 'SC-120.1',
            TRUE ~ MethodShortName)
          ) |>
   select(CharID, CharIDText, Characteristic.Name, MethodShortName, Result.Unit, 
