@@ -19,25 +19,25 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      prepost_import <- NA
      audit_import <- NA
      if ("Organization_Details" %in% sheets) {
-          org_import <- read_excel(xlsx_input,sheet = "Organization Details", range = "B6:C19",
+          org_import <- read_excel(file,sheet = "Organization Details", range = "B6:C19",
                                    col_names = FALSE) |>
             setNames(c("key","value")) |>
             mutate(across(everything(), as.character))
      }
      if ("Projects" %in% sheets) {
-          projects_import <- read_excel(xlsx_input,sheet = "Projects") |>
+          projects_import <- read_excel(file,sheet = "Projects") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*]")) |> #These lines remove the ^ and * from the new template's column headers, so the script will run correctly
             mutate(across(everything(), as.character))
      }
      if ("Monitoring_Locations" %in% sheets) {
-          locations_import <- read_excel(xlsx_input,sheet = "Monitoring_Locations") |>
+          locations_import <- read_excel(file,sheet = "Monitoring_Locations") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*?]")|> str_trim()) |>
             mutate(`Date Established` = as.Date(`Date Established`, format = "%Y-%m-%d"),
                    across(c(Latitude, Longitude), as.numeric),
                    across(-c(Latitude, Longitude,`Date Established`), as.character))
      }
      if ("Deployment" %in% sheets) {
-          deployment_import <- read_excel(xlsx_input,sheet = "Deployment") |>
+          deployment_import <- read_excel(file,sheet = "Deployment") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             mutate(`Source Map Scale` = NA, Reachcode = NA, Measure = NA, LLID = NA, `River Mile` = NA) |>
             mutate(`Sample Depth` = as.numeric(`Sample Depth`),
@@ -48,12 +48,12 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                              `Deployment Start Time`,`Deployment End Time`), as.character))
      }
      # if ("QC_Equipment" %in% sheets) {
-     #      equipment_import <- read_excel(xlsx_input, sheet = "QC_Equipment") |>
+     #      equipment_import <- read_excel(file, sheet = "QC_Equipment") |>
      #        rename_with(~ str_remove_all(.x, "[\\^\\*?]")|> str_trim()) |>
      #        mutate(across(everything(), as.character))
      # }
      if ("Results" %in% sheets) {
-          results_import <- read_excel(xlsx_input,sheet = "Results") |>
+          results_import <- read_excel(file,sheet = "Results") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             mutate(`Activity Start Date` = as.Date(`Activity Start Date`, format = "%Y-%m-%d"),
                    `Activity Start Time` = hms::as_hms(`Activity Start Time`),
@@ -62,7 +62,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                              `Result Value`), as.character))
      }
      if ("PrePost" %in% sheets) {
-          prepost_import <- read_excel(xlsx_input,sheet = "PrePost") |>
+          prepost_import <- read_excel(file,sheet = "PrePost") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             mutate(`Activity Date` = as.Date(`Activity Date`, format = "%Y-%m-%d"),
                    `Activity Time` = hms::as_hms(`Activity Time`),
@@ -72,7 +72,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                             `Reference Result Unit`), as.character))
      }
      if ("Audit_Data" %in% sheets) {
-          audit_import <- read_excel(xlsx_input,sheet = "Audit_Data") |>
+          audit_import <- read_excel(file,sheet = "Audit_Data") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             mutate(across(c(`Activity Start Date`, `Activity End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
                    across(c(`Activity Start Time`, `Activity End Time`), hms::as_hms),
