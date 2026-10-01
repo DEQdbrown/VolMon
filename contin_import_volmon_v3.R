@@ -1,10 +1,10 @@
 contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "Projects", 
-                           "Monitoring_Locations", "Deployment", "QC_Equipment", "Results", 
-                           "PrePost", "Audit_Data")) 
+                           "Monitoring_Locations", "Deployment", #"QC_Equipment", 
+                           "Results", "PrePost", "Audit_Data")) 
 {
      options(scipen = 999)
      sheet_check <- sheets %in% c("Organization_Details", "Projects", 
-                                  "Monitoring_Locations", "Deployment", "QC_Equipment", 
+                                  "Monitoring_Locations", "Deployment", #"QC_Equipment", 
                                   "Results", "PrePost", "Audit_Data")
      if (any(!sheet_check)) {
           stop(paste0("The following are not acceptable input values for variable 'sheets': ", 
