@@ -47,11 +47,11 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                    across(-c(`Sample Depth`, `Equipment ID`, `Deployment Start Date`,`Deployment End Date`,
                              `Deployment Start Time`,`Deployment End Time`), as.character))
      }
-     if ("QC_Equipment" %in% sheets) {
-          equipment_import <- read_excel(xlsx_input, sheet = "QC_Equipment") |>
-            rename_with(~ str_remove_all(.x, "[\\^\\*?]")|> str_trim()) |>
-            mutate(across(everything(), as.character))
-     }
+     # if ("QC_Equipment" %in% sheets) {
+     #      equipment_import <- read_excel(xlsx_input, sheet = "QC_Equipment") |>
+     #        rename_with(~ str_remove_all(.x, "[\\^\\*?]")|> str_trim()) |>
+     #        mutate(across(everything(), as.character))
+     # }
      if ("Results" %in% sheets) {
           results_import <- read_excel(xlsx_input,sheet = "Results") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
@@ -84,7 +84,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                              Projects = as.data.frame(projects_import), 
                              Monitoring_Locations = as.data.frame(locations_import), 
                              Deployment = as.data.frame(deployment_import), 
-                             QC_Equipment = as.data.frame(equipment_import),
+                             #QC_Equipment = as.data.frame(equipment_import),
                              Results = as.data.frame(results_import), 
                              PrePost = as.data.frame(prepost_import), 
                              Audit_Data = as.data.frame(audit_import))
