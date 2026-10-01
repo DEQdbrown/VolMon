@@ -25,9 +25,10 @@ contin_import_volmon_v2 <- function (file, sheets = c("Organization_Details", "P
           colnames(org_import) <- c("key", "value")
      }
      if ("Projects" %in% sheets) {
-          projects_col_types <- c("text", "text", "text", "text", 
-                                  "text", "text")
-          projects_col_names <- make.names(cols_projects_volmon())
+          projects_col_types <- c("text", "text", "text", "text", "text", "text")
+          projects_col_names <- c("Project Name", "Project Description", 
+                                  "Approved QAPP Indicator", "QAPP Approval Agency Name", 
+                                  "Project Attachment File Name","Project Type")
           projects_import <- readxl::read_excel(file, sheet = "Projects", 
                                                 col_types = projects_col_types)
           colnames(projects_import) <- projects_col_names
@@ -38,8 +39,20 @@ contin_import_volmon_v2 <- function (file, sheets = c("Organization_Details", "P
           locations_col_types <- c("text", "text", "text", "numeric", 
                                    "numeric", "text", "text", "text", "text", "text", 
                                    "text", "text", "text", "text", "date", "text", 
-                                   "text", "text", "text", "text", "text","text","text","text","text","text","text","text")
-          locations_col_names <- make.names(mloc_col_names_volmon())
+                                   "text", "text", "text", "text", "text","text","text",
+                                   "text","text","text","text","text")
+          locations_col_names <- c("Monitoring Location ID", "Monitoring Location Name", 
+                                   "Monitoring Location Type", "Latitude", "Longitude", 
+                                   "Horizontal Datum", "Coordinate Collection Method", 
+                                   "Monitoring Location Description", 
+                                   "Tribal Land", "Tribal Land Name", "County Name", 
+                                   "State Code", "HUC 8 Code", "Date Established", 
+                                   "Monitoring Location Comments", "Alternate ID 1", 
+                                   "Alternate Context 1", "Alternate ID 2", 
+                                   "Alternate Context 2", "Alternate ID 3", 
+                                   "Alternate Context 3", "Reachcode", "Measure", 
+                                   "LLID", "River Mile", "Permanent Identifier", 
+                                   "Monitoring Location Status ID", "Monitoring Location Status Comment")
           locations_import <- readxl::read_excel(file, sheet = "Monitoring_Locations", 
                                                  range = cellranger::cell_cols(1:28), col_types = locations_col_types)
           colnames(locations_import) <- locations_col_names
@@ -47,9 +60,13 @@ contin_import_volmon_v2 <- function (file, sheets = c("Organization_Details", "P
                                                     ncol(locations_import), ]
      }
      if ("Deployment" %in% sheets) {
-          deployment_col_types <- c("text", "text", "text", "date", "date", "date","date",
-                                    "text", "text", "text", "text")
-          deployment_col_names <- make.names(cols_deploy_volmon())
+          deployment_col_types <- c("text", "text", "text", "date", "date", "date",
+                                    "date", "text", "text", "text", "text","text")
+          deployment_col_names <- c("Monitoring Location ID", "Equipment ID", 
+                                    "Characteristic Name", "Deployment Start Date", 
+                                    "Deployment Start Time", "Deployment End Date", 
+                                    "Deployment End Time", "Sample Depth", "Sample Depth Unit", 
+                                    "Sample Media", "Sample Sub Media","Deployment Comment")
           deployment_import <- readxl::read_excel(file, sheet = "Deployment", 
                                                   col_types = deployment_col_types)
           colnames(deployment_import) <- deployment_col_names
@@ -69,7 +86,10 @@ contin_import_volmon_v2 <- function (file, sheets = c("Organization_Details", "P
      if ("PrePost" %in% sheets) {
           prepost_col_types <- c("text", "text", "date", "date", 
                                  "numeric", "text", "numeric", "text","text")
-          prepost_col_names <- make.names(cols_prepost_volmon())
+          prepost_col_names <- c("Equipment ID", "Characteristic Name", "Activity Date", 
+                                 "Activity Time","Equipment Result Value", 
+                                 "Equipment Result Unit", "Reference Result Value", 
+                                 "Reference Result Unit", "Reference ID")
           prepost_import <- readxl::read_excel(file, sheet = "PrePost", 
                                                col_types = prepost_col_types)
           colnames(prepost_import) <- prepost_col_names
@@ -79,10 +99,18 @@ contin_import_volmon_v2 <- function (file, sheets = c("Organization_Details", "P
      if ("Audit_Data" %in% sheets) {
           audit_col_types <- c("text", "date", "date","date","date", "text", "text", "text", 
                                "text", "text", "text", "numeric", "text", "text", "text", "text", 
-                               "text", "text", "text")
-          audit_col_names <- make.names(cols_audit_volmon())
+                               "text", "text", "text", "text", "text")
+          audit_col_names <- c("Monitoring Location ID","Activity Start Date", 
+                               "Activity Start Time", "Activity End Date", 
+                               "Activity End Time", "Activity Start End Time Zone", 
+                               "Activity Type", "Activity ID", "Equipment ID", 
+                               "Sample Collection Method", "Characteristic Name", 
+                               "Result Value", "Result Unit", "Result Analytical Method ID", 
+                               "Result Analytical Method Context", "Result Value Type", 
+                               "Result Status ID", "Result Measure Qualifier", 
+                               "Result Comment", "precDQL","rDQL")
           audit_import <- readxl::read_excel(file, sheet = "Audit_Data", 
-                                             range = cellranger::cell_cols(1:19), col_types = audit_col_types)
+                                             range = cellranger::cell_cols(1:21), col_types = audit_col_types)
           colnames(audit_import) <- audit_col_names
           audit_import <- audit_import[rowSums(is.na(audit_import)) != 
                                             ncol(audit_import), ]
