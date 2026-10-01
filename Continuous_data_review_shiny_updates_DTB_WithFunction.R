@@ -7,6 +7,8 @@ library(tibble)
 library(tidyverse)
 library(odeqmloctools)
 library(openxlsx)
+library(readxl)
+library(hms)
 
 #Update these to match the dataset you're working on and where you want the data to be pulled from and exported to
 
@@ -16,7 +18,7 @@ setwd("//deqlab1/Vol_Data/Luckiamute/2025")
 
 xlsx_input <- "WorkingCopy_LWC_2025ContStreamTemp_DEQ_20260123.xlsx"
 
-output_dir <-"//deqlab1/Vol_Data/Luckiamute/2025"
+output_dir <-"//deqlab1/Assessment/AWQMS/Validation"
 
 xlsx_pre_check_output <- "Luckiamute2025_PRECHECK.xlsx"
 shiny_output <- "Luckiamute2025_SHINY_CDR.Rdata"
@@ -27,48 +29,38 @@ changelog <-  'Luckiamute2025_changelog'
 source("//deqlab1/Vol_Data/Luckiamute/2025/FUNCTION_Logger_Review.R")
 
 # Read in the functions necessary for this script to run
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_audit_volmon.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_export.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_forexport.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_prepost_volmon.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_projects_volmon.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_export_volmon_v2_1.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v2.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/mloc_col_names_volmon.R")
+#source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v2.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v3.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/update_deploy_volmon.R")
 
 
 #- Import the Data -------------------------------------------------------------
 
-df0 <- contin_import_volmon_v2(file=xlsx_input)
+ df0 <- contin_import_volmon_v3(file=xlsx_input)
+ 
+ df0.projects <- df0[["Projects"]]
+ 
+ df0.org <- df0[["Organization_Details"]]
 
-df0.projects <- df0[["Projects"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]")) #These lines remove the ^ and * from the new template's column headers, so the script will run correctly
+ df0.mloc <- df0[["Monitoring_Locations"]]
 
-df0.org <- df0[["Organization_Details"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
+ df0.results <- df0[["Results"]]
+ 
+ df0.audits <- df0[["Audit_Data"]]
+ 
+ df0.deployment <- df0[["Deployment"]]
+ 
+ df0.prepost <- df0[["PrePost"]]
 
-df0.mloc <- df0[["Monitoring_Locations"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
-
-df0.results <- df0[["Results"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
-
-df0.audits <- df0[["Audit_Data"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
-
-df0.deployment <- df0[["Deployment"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
-
-df0.prepost <- df0[["PrePost"]]|>
-  rename_with(~ str_remove_all(.x, "[\\^\\*]"))
 
 #- Completeness Pre checks -----------------------------------------------------
 # A TRUE result means something is missing
 checks_df <- odeqcdr::pre_checks(template_list = df0)
 
-# Save pre check results to xlsx
+ # Save pre check results to xlsx
 writexl::write_xlsx(checks_df, path=paste0(output_dir, "/", xlsx_pre_check_output),
                     format_headers=TRUE)
 
@@ -456,7 +448,7 @@ df1.deployment<- df1.deployment %>%
 df2.deployment <- update_deploy_volmon(deploy = df1.deployment)
 
 # Fill in the project ID
-df2.deployment$Project.ID <- df0.projects$Project.ID
+df2.deployment$Project.ID <- df1.projects$Project.ID
 
 
 # Save R global environment just in case.
@@ -471,6 +463,6 @@ contin_export_volmon_v2 (file=paste0(output_dir, "/", xlsx_output),
                        mloc=df1.mloc,
                        deployment=df1.deployment,
                        results=df.results.final,
-                       prepost=df0.prepost,
+                       prepost=df1.prepost,
                        audits=df.audits.final,
                        sumstats=df.sumstats)
