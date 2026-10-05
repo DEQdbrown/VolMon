@@ -24,11 +24,11 @@ source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/Datab
 # set file path for vol data working copy template and enter submission ID
 
 ###### Set Working Directory, working path,  and Submission ID ###########
-setwd("//deqlab1/Vol_Data/WallowaSWCD/2024/Wallowa sub-basin/grab/R") ##### change this each time!!!!!!!!!!!!!!
+setwd("//deqlab1/Vol_Data/yamhill/2024-2025/Deer Creek SIA/grab") ##### change this each time!!!!!!!!!!!!!!
 
-data_path <- "//deqlab1/Vol_Data/WallowaSWCD/2024/Wallowa sub-basin/grab/WorkingCopy_2024_Wallowa_WQM-Grab.xlsx"
+data_path <- "//deqlab1/Vol_Data/yamhill/2024-2025/Deer Creek SIA/grab/WorkingCopy_YSWCD_YamhillSIA_2024-2025_Grab_Vol.xlsx"
 
-sub_id <- 339
+sub_id <- 342
 
 # bring in the data tab of the working copy 
 data <- read_excel(data_path,sheet = "Results") |>
@@ -83,6 +83,7 @@ projectinfo <- data |>
          Low_QC = case_when(
            is.na(Low_QC) & CharIDText == 'dos' & FieldOrLab == 'Field' ~ 10,
            is.na(Low_QC) & CharIDText == 'tb'  & FieldOrLab == 'Field' ~ 20,
+           is.na(Low_QC) & FieldOrLab == 'Lab' ~ LOQ*5,
            TRUE ~ Low_QC),
          MethodShortName = case_when(
            is.na(MethodShortName) & CharIDText == 'ec'  & FieldOrLab == 'Lab'   ~ 'FB-C24',
