@@ -32,18 +32,21 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      if ("Monitoring_Locations" %in% sheets) {
           locations_import <- read_excel(file,sheet = "Monitoring_Locations") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*?]")|> str_trim()) |>
+            mutate(`Source Map Scale` = NA, Reachcode = NA, Measure = NA, LLID = NA, `River Mile` = NA) |>
             mutate(`Date Established` = as.Date(`Date Established`, format = "%Y-%m-%d"),
-                   across(c(Latitude, Longitude), as.numeric),
-                   across(-c(Latitude, Longitude,`Date Established`), as.character))
+                   across(c(Latitude, Longitude,`Source Map Scale`, Reachcode, 
+                            Measure, LLID, `River Mile`), as.numeric),
+                   across(-c(Latitude, Longitude,`Date Established`, `Source Map Scale`, 
+                             Reachcode, Measure, LLID, `River Mile`), as.character))
      }
      if ("Deployment" %in% sheets) {
           deployment_import <- read_excel(file,sheet = "Deployment") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
-            mutate(`Source Map Scale` = NA, Reachcode = NA, Measure = NA, LLID = NA, `River Mile` = NA) |>
+            
             mutate(`Sample Depth` = as.numeric(`Sample Depth`),
                    across(c(`Deployment Start Date`,`Deployment End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
                    across(c(`Deployment Start Time`,`Deployment End Time`), hms::as_hms),
-                   across(c(`Equipment ID`,`Source Map Scale`, Reachcode, Measure, LLID, `River Mile`), as.numeric),
+                   `Equipment ID` = as.numeric(`Equipment ID`),
                    across(-c(`Sample Depth`, `Equipment ID`, `Deployment Start Date`,`Deployment End Date`,
                              `Deployment Start Time`,`Deployment End Time`), as.character))
      }
