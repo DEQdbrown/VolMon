@@ -44,8 +44,9 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
           deployment_import <- read_excel(file,sheet = "Deployment") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
                         mutate(`Sample Depth` = as.numeric(`Sample Depth`),
-                   across(c(`Deployment Start Date`,`Deployment End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
-                   across(c(`Deployment Start Time`,`Deployment End Time`), hms::as_hms),
+                   across(matches("^(Deployment )?(Start|End) Date$"), 
+                          \(x) as.Date (x, format = "%Y-%m-%d")),
+                   across(matches("^(Deployment )?(Start|End) Time$"), hms::as_hms),
                    `Equipment ID` = as.numeric(`Equipment ID`),
                    across(-c(`Sample Depth`, `Equipment ID`, `Deployment Start Date`,`Deployment End Date`,
                              `Deployment Start Time`,`Deployment End Time`), as.character))
