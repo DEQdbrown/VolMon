@@ -11,9 +11,6 @@ contin_export_volmon_v3 <- function (file, org, projects, mloc, deployment, resu
                              Comments = as.character(NA), Quality.Assurance.Plan = Approved.QAPP.Indicator, 
                              Continuous.Monitoring = "Yes")
      }
-     else {
-       
-     }
      names(projects) <- gsub("\\.", " ", names(projects))
      names(mloc) <- gsub("\\.", " ", names(mloc))
      names(deployment) <- gsub("\\.", " ", names(deployment))
@@ -40,11 +37,12 @@ contin_export_volmon_v3 <- function (file, org, projects, mloc, deployment, resu
                                 "Monitoring_Locations", "Deployment", "New_Equipment", 
                                 "Results", "PrePost", "Audit_Data")
           openxlsx::write.xlsx(xlsx_list, file = file, colWidths = "auto", 
-                               firstActiveRow = c(5, 2, 2, 2, 2, 2, 2, 2), firstRow = c(FALSE, 
-                                                                                        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE), rowNames = c(FALSE, 
-                                                                                                                                                FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), 
-                               borders = "rows", startCol = c(2, 1, 1, 1, 1, 1, 
-                                                              1, 1), startRow = c(5, 1, 1, 1, 1, 1, 1, 1), 
+                               firstActiveRow = c(5, 2, 2, 2, 2, 2, 2, 2, 2), 
+                               firstRow = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE), 
+                               rowNames = c(FALSE, FALSE, FALSE, FALSE, FALSE, 
+                                            FALSE, FALSE, FALSE, FALSE), 
+                               borders = "rows",
+                               startRow = c(5, 1, 1, 1, 1, 1, 1, 1, 1), 
                                headerStyle = openxlsx::createStyle(fgFill = "#000000", 
                                                                    halign = "LEFT", textDecoration = "Bold", wrapText = TRUE, 
                                                                    border = "Bottom", fontColour = "white", fontName = "Arial", 
@@ -57,15 +55,16 @@ contin_export_volmon_v3 <- function (file, org, projects, mloc, deployment, resu
                                 "Monitoring_Locations", "Deployment", "New_Equipment", 
                                 "Results", "PrePost", "Audit_Data", "AWQMS_Sum_Stats")
           openxlsx::write.xlsx(xlsx_list, file = file, colWidths = "auto", 
-                               firstActiveRow = c(5, 2, 2, 2, 2, 2, 2, 2, 2), firstRow = c(FALSE, 
-                                                                                           TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE), 
+                               firstActiveRow = c(5, 2, 2, 2, 2, 2, 2, 2, 2), 
+                               firstRow = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE), 
                                rowNames = c(FALSE, FALSE, FALSE, FALSE, FALSE, 
-                                            FALSE, FALSE, FALSE, FALSE), borders = "rows", 
-                               startCol = c(2, 1, 1, 1, 1, 1, 1, 1, 1), startRow = c(5, 
-                                                                                     1, 1, 1, 1, 1, 1, 1, 1), headerStyle = openxlsx::createStyle(fgFill = "#000000", 
-                                                                                                                                                  halign = "LEFT", textDecoration = "Bold", wrapText = TRUE, 
-                                                                                                                                                  border = "Bottom", fontColour = "white", fontName = "Arial", 
-                                                                                                                                                  fontSize = 10))
+                                            FALSE, FALSE, FALSE, FALSE), 
+                               borders = "rows",
+                               startRow = c(5, 1, 1, 1, 1, 1, 1, 1, 1), 
+                               headerStyle = openxlsx::createStyle(fgFill = "#000000", 
+                                                                   halign = "LEFT", textDecoration = "Bold", wrapText = TRUE, 
+                                                                   border = "Bottom", fontColour = "white", fontName = "Arial", 
+                                                                   fontSize = 10))
      }
      wb <- openxlsx::loadWorkbook(file = file, isUnzipped = FALSE)
      openxlsx::modifyBaseFont(wb, fontSize = 10, fontName = "Arial")
