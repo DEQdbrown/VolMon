@@ -4,12 +4,15 @@ contin_export_volmon_v3 <- function (file, org, projects, mloc, deployment, resu
                                      audits, sumstats = NULL, equipment = NULL) 
 {
      if (is.null(equipment)) {
-          equipment <- deployment %>% dplyr::left_join(projects) %>% 
-               dplyr::mutate(Equipment.Type = "Probe/Sensor",
-                             Equipment.Name = Equipment.ID, 
-                             Model.Number = as.character(NA), Serial.Number = as.character(NA), 
-                             Comments = as.character(NA), Quality.Assurance.Plan = Approved.QAPP.Indicator, 
-                             Continuous.Monitoring = "Yes")
+          equipment <- deployment %>% dplyr::left_join(projects) %>%
+            dplyr::mutate(Equipment.Type = "Probe/Sensor",
+                          Equipment.Name = Equipment.ID, 
+                          Model.Number = as.character(NA), Serial.Number = as.character(NA), 
+                          Comments = as.character(NA), Quality.Assurance.Plan = Approved.QAPP.Indicator, 
+                          Continuous.Monitoring = "Yes") |>
+            select(c(Equipment.Type, Equipment.ID, Equipment.Name, Model.Number,
+                     Serial.Number, Comments, Quality.Assurance.Plan, Continuous.Monitoring))
+          
      }
      names(projects) <- gsub("\\.", " ", names(projects))
      names(mloc) <- gsub("\\.", " ", names(mloc))
