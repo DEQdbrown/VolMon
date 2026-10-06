@@ -14,7 +14,7 @@ library(hms)
 
 analyst <- "Kayla"
 
-setwd("//deqlab1/Vol_Data/Luckiamute/2025")
+setwd("//labfil01/Vol_Data/Luckiamute/2025")
 
 xlsx_input <- "WorkingCopy_LWC_2025ContStreamTemp_DEQ_20260123.xlsx"
 
@@ -26,12 +26,13 @@ xlsx_output <- "Luckiamute2025_output_test.xlsx"
 
 changelog <-  'Luckiamute2025_changelog'
 
-source("//deqlab1/Vol_Data/Luckiamute/2025/FUNCTION_Logger_Review.R")
+source("//labfil01/Vol_Data/Luckiamute/2025/FUNCTION_Logger_Review.R")
 
 # Read in the functions necessary for this script to run
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_export.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_forexport.R")
-source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_export_volmon_v2_1.R")
+#source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_export_volmon_v2_1.R")
+source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_export_volmon_v3.R")
 #source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v2.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/contin_import_volmon_v3.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/update_deploy_volmon.R")
@@ -456,12 +457,11 @@ save.image(paste0(output_dir, "/Renv.RData"))
 
 
 #### Export####
-
-contin_export_volmon_v2 (file=paste0(output_dir, "/", xlsx_output),
+contin_export_volmon_v3(file = file.path(output_dir, xlsx_output),
                        org=df0.org,
                        projects=df1.projects,
                        mloc=df1.mloc,
-                       deployment=df1.deployment,
+                       deployment=df2.deployment,
                        results=df.results.final,
                        prepost=df1.prepost,
                        audits=df.audits.final,
