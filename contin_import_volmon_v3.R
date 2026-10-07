@@ -48,7 +48,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                           \(x) as.Date (x, format = "%Y-%m-%d")),
                    across(matches("^(Deployment )?(Start|End) Time$"), hms::as_hms),
                    `Equipment ID` = as.numeric(`Equipment ID`),
-                   across(-c(`Sample Depth`, `Equipment ID`, matches("^(Deployment )?(Start|End) (Date|Time)$"), as.character)))
+                   across(-c(`Sample Depth`, `Equipment ID`, matches("^(Deployment )?(Start|End) (Date|Time)$")), as.character))
      }
      # if ("QC_Equipment" %in% sheets) {
      #      equipment_import <- read_excel(file, sheet = "QC_Equipment") |>
