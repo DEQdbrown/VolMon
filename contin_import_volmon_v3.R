@@ -41,14 +41,18 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                              Reachcode, Measure, LLID, `River Mile`), as.character))
      }
      if ("Deployment" %in% sheets) {
-          deployment_import <- read_excel(file,sheet = "Deployment") |>
+          deployment_import <- read_excel(xlsx_input,sheet = "Deployment") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
+            rename_with(~ if_else(str_detect(.x, "^(Start|End) "),
+                                  paste("Deployment", .x),
+                                  .x)) |>
+            #rename_with(~ paste("Deployment", .x), .cols = matches("^(Start|End) ")) |>
             mutate(`Sample Depth` = as.numeric(`Sample Depth`),
-                   across(matches("^(Deployment )?(Start|End) Date$"), 
-                          \(x) as.Date (x, format = "%Y-%m-%d")),
-                   across(matches("^(Deployment )?(Start|End) Time$"), hms::as_hms),
+                   across(c(`Deployment Start Date`, `Deployment End Date`), \(x) as.Date(x, format = "%Y-%m-%d")),
+                   across(c(`Deployment Start Time`, `Deployment End Time`), hms::as_hms),
                    `Equipment ID` = as.numeric(`Equipment ID`),
-                   across(-c(`Sample Depth`, `Equipment ID`, matches("^(Deployment )?(Start|End) (Date|Time)$")), as.character))
+                   across(-c(`Sample Depth`, `Equipment ID`, `Deployment Start Date`, 
+                             `Deployment End Date`,`Deployment Start Time`, `Deployment End Time`), as.character))
      }
      # if ("QC_Equipment" %in% sheets) {
      #      equipment_import <- read_excel(file, sheet = "QC_Equipment") |>
