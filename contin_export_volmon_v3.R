@@ -25,6 +25,16 @@ contin_export_volmon_v3 <- function (file, org, projects, mloc, deployment, resu
      names(results) <- gsub("\\.", " ", names(results))
      names(prepost) <- gsub("\\.", " ", names(prepost))
      names(audits) <- gsub("\\.", " ", names(audits))
+     
+# These lines match the column headers with what's in odeqcdr
+     equipment <- equipment[, odeqcdr::cols_equipment()]
+     if ("rDQL" %in% names(results)) {
+       results <- results[, odeqcdr::cols_results()]
+     }
+     else {
+       results <- results[, odeqcdr::cols_results()[1:9]]
+     }
+     prepost <- prepost[, odeqcdr::cols_prepost()]
 
 # This section looks for sumstats and creates a workbook without the tab if it's missing. If not then it creates the tab
      if (is.null(sumstats)) {
