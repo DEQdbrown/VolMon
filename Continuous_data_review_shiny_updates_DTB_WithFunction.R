@@ -11,7 +11,24 @@ library(readxl)
 library(hms)
 
 #Update these to match the dataset you're working on and where you want the data to be pulled from and exported to
+# Accessibility Okay template
+analyst <- "Liz"
 
+setwd("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R")
+
+xlsx_input <- "WorkingCopy_ContDataSubTem3_Rogue_2020.xlsx"
+
+output_dir <-"//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R/Output"
+
+xlsx_pre_check_output <- "Curry_Rogue2020_PRECHECK.xlsx"
+shiny_output <- "Curry_Rogue2020_SHINY_CDR.Rdata"
+xlsx_output <- "Curry_Rogue2020_output_test.xlsx"
+
+changelog <-  'Curry_Rogue2020_changelog'
+
+source("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R/LB_Curry_2020_FUNCTION_Logger_Review_V1.R")
+
+# IR style VolMon template
 analyst <- "Kayla"
 
 setwd("//labfil01/Vol_Data/Luckiamute/2025")
@@ -78,7 +95,9 @@ df1.results.units <- dplyr::select(df1.results, row.results, Result.Unit.orig=Re
 
 # #- Set Project ID --------------------------------------------------------------
 
-df1.projects <- df0.projects %>% add_column(Project.ID="ODEQVolMonWQProgram")
+df1.projects <- df0.projects |>
+  add_column(Project.ID="ODEQVolMonWQProgram") |>
+  relocate(Project.ID, .before = Project.Name)
 
 #- Review Monitoring Location Info----------------------------------------------
 
@@ -128,6 +147,8 @@ df1.audits <- dplyr::left_join(df1.audits, df.tz, by="Monitoring.Location.ID")
 # Add a timezone if one is missing, The code will correct in dst_check if it's wrong.
 # Flag timezones that are wrong.
 df1.results <- df1.results %>%
+     rename_with(~recode(.x, Activity.Time.Zone = "Activity.Start.End.Time.Zone"),
+                 .cols = any_of("Activity.Time.Zone")) |>
      dplyr::mutate(Activity.Start.End.Time.Zone=dplyr::case_when(tz_name=="America/Los_Angeles" &
                                                                       is.na(Activity.Start.End.Time.Zone) ~ "PDT",
                                                                  tz_name=="America/Boise" &
@@ -391,7 +412,10 @@ odeqcdr::launch_shiny()
 #Once that is done update status IDs
 # Set status IDs
 df6.results <- odeqcdr::status_update(df5.results)
-df.audits.final <- odeqcdr::status_update(df4.audits.dql)
+df.audits.final <- odeqcdr::status_update(df4.audits.dql) |>
+  relocate(Result.Value, .before = Result.Unit) |>
+  select(-c(row.audits, tz_name, tz_wrong, audit.datetime.start, audit.datetime.end, 
+            Datetime.Comment, Project.ID, Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
 
 #Output changelog
 
@@ -437,6 +461,7 @@ df.results.final <- df.results.final %>%
                                                 TRUE ~ Result.Unit)) %>%
      dplyr::select(-Result.Unit.orig) %>%
      dplyr::arrange(row.results) %>%
+     select(-c(row.results, tz_name, tz_wrong, datetime, Datetime.Comment, Project.ID, deployed)) |>
      as.data.frame()
 
 #### Update the Deployment information ####
