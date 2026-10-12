@@ -38,7 +38,8 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
                    across(c(Latitude, Longitude,`Source Map Scale`, Reachcode, 
                             Measure, LLID, `River Mile`), as.numeric),
                    across(-c(Latitude, Longitude,`Date Established`, `Source Map Scale`, 
-                             Reachcode, Measure, LLID, `River Mile`), as.character))
+                             Reachcode, Measure, LLID, `River Mile`), as.character)) |>
+           relocate(`Source Map Scale`, .before = `Monitoring Location Description`)
      }
      if ("Deployment" %in% sheets) {
           deployment_import <- read_excel(xlsx_input,sheet = "Deployment") |>
