@@ -78,7 +78,7 @@ source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/updat
 # A TRUE result means something is missing
 checks_df <- odeqcdr::pre_checks(template_list = df0)
 
- # Save pre check results to xlsx
+# Save pre check results to xlsx
 writexl::write_xlsx(checks_df, path=paste0(output_dir, "/", xlsx_pre_check_output),
                     format_headers=TRUE)
 
@@ -161,6 +161,8 @@ df1.results <- df1.results %>%
                                              TRUE ~ TRUE))
 
 df1.audits <- df1.audits %>%
+     rename_with(~recode(.x, Activity.Time.Zone = "Activity.Start.End.Time.Zone"),
+              .cols = any_of("Activity.Time.Zone")) |>
      dplyr::mutate(Activity.Start.End.Time.Zone=dplyr::case_when(tz_name=="America/Los_Angeles" &
                                                                       is.na(Activity.Start.End.Time.Zone) ~ "PDT",
                                                                  tz_name=="America/Boise" &
@@ -413,6 +415,7 @@ odeqcdr::launch_shiny()
 # Set status IDs
 df6.results <- odeqcdr::status_update(df5.results)
 df.audits.final <- odeqcdr::status_update(df4.audits.dql) |>
+  rename(ActivityID = Activity.ID) |>
   relocate(Result.Value, .before = Result.Unit) |>
   select(-c(row.audits, tz_name, tz_wrong, audit.datetime.start, audit.datetime.end, 
             Datetime.Comment, Project.ID, Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
