@@ -63,7 +63,10 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      if ("Results" %in% sheets) {
           results_import <- read_excel(file,sheet = "Results") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
-            mutate(`Activity Start Date` = as.Date(`Activity Start Date`, format = "%Y-%m-%d"),
+            mutate(`Activity Time Zone` = if_else(str_detect(`Activity Time Zone`, " "),
+                                                  str_remove(`Activity Time Zone`, " .*"),
+                                                  `Activity Time Zone`),
+                   `Activity Start Date` = as.Date(`Activity Start Date`, format = "%Y-%m-%d"),
                    `Activity Start Time` = hms::as_hms(`Activity Start Time`),
                    across(c(`Equipment ID`, `Result Value`), as.numeric),
                    across(-c(`Activity Start Date`, `Activity Start Time`, `Equipment ID`, 
@@ -83,7 +86,10 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
           audit_import <- read_excel(file,sheet = "Audit_Data") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             filter(!is.na(`Activity ID (Locked)`), `Activity ID (Locked)` != "") |>
-            mutate(across(c(`Activity Start Date`, `Activity End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
+            mutate(`Activity Time Zone` = if_else(str_detect(`Activity Time Zone`, " "),
+                                                  str_remove(`Activity Time Zone`, " .*"),
+                                                  `Activity Time Zone`),
+                   across(c(`Activity Start Date`, `Activity End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
                    across(c(`Activity Start Time`, `Activity End Time`), hms::as_hms),
                    across(c(`Equipment ID`, `Result Value`), as.numeric),
                    across(-c(`Activity Start Date`, `Activity End Date`,`Activity Start Time`,
