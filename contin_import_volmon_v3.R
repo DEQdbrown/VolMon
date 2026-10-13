@@ -82,6 +82,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      if ("Audit_Data" %in% sheets) {
           audit_import <- read_excel(file,sheet = "Audit_Data") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
+            filter(!is.na(`Activity ID (Locked)`), `Activity ID (Locked)` != "") |>
             mutate(across(c(`Activity Start Date`, `Activity End Date`), \(x) as.Date (x, format = "%Y-%m-%d")),
                    across(c(`Activity Start Time`, `Activity End Time`), hms::as_hms),
                    across(c(`Equipment ID`, `Result Value`), as.numeric),
