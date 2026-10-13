@@ -63,6 +63,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      if ("Results" %in% sheets) {
           results_import <- read_excel(file,sheet = "Results") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]|\\(.*") |> str_trim()) |>
+            rename_with(~ str_replace(.x, "^Activity Start/End Time Zone$", "Activity Time Zone")) |>
             mutate(`Activity Time Zone` = if_else(str_detect(`Activity Time Zone`, " "),
                                                   str_remove(`Activity Time Zone`, " .*"),
                                                   `Activity Time Zone`),
@@ -85,6 +86,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
      if ("Audit_Data" %in% sheets) {
           audit_import <- read_excel(file,sheet = "Audit_Data") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]|\\(.*") |> str_trim()) |>
+            rename_with(~ str_replace(.x, "^Activity Start/End Time Zone$", "Activity Time Zone")) |>
             filter(!is.na(`Activity ID`), `Activity ID` != "") |>
             mutate(`Activity Time Zone` = if_else(str_detect(`Activity Time Zone`, " "),
                                                   str_remove(`Activity Time Zone`, " .*"),
