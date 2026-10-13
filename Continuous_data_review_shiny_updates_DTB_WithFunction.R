@@ -28,23 +28,6 @@ changelog <-  'Curry_Rogue2020_changelog'
 
 source("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R/LB_Curry_2020_FUNCTION_Logger_Review_V1.R")
 
-# IR style VolMon template
-analyst <- "Kayla"
-
-setwd("//labfil01/Vol_Data/Luckiamute/2025")
-
-xlsx_input <- "WorkingCopy_LWC_2025ContStreamTemp_DEQ_20260123.xlsx"
-
-output_dir <-"//deqlab1/Assessment/AWQMS/Validation"
-
-xlsx_pre_check_output <- "Luckiamute2025_PRECHECK.xlsx"
-shiny_output <- "Luckiamute2025_SHINY_CDR.Rdata"
-xlsx_output <- "Luckiamute2025_output_test.xlsx"
-
-changelog <-  'Luckiamute2025_changelog'
-
-source("//labfil01/Vol_Data/Luckiamute/2025/FUNCTION_Logger_Review.R")
-
 # Read in the functions necessary for this script to run
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_export.R")
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_forexport.R")
@@ -418,7 +401,7 @@ df.audits.final <- odeqcdr::status_update(df4.audits.dql) |>
   rename(ActivityID = Activity.ID) |>
   relocate(Result.Value, .before = Result.Unit) |>
   select(-c(row.audits, tz_name, tz_wrong, audit.datetime.start, audit.datetime.end, 
-            Datetime.Comment, Project.ID, Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
+            Project.ID, Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
 
 #Output changelog
 
