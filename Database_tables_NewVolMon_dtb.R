@@ -43,8 +43,9 @@ DB_tables <- function(final_DQL) {
            samplers,SampleDepth,SampleDepthUnit,DEQ_Comment,Org_Comment) %>% 
     left_join(stations, by = c('LASAR_ID' = 'STATION_KEY')) %>%
     left_join(context, by = c('ContextID'= 'CntextIdText')) %>% # what is this for? 
-    mutate(SmplDepthUnitID = ifelse(SampleDepthUnit %like% 'meters', 146,
-                                    ifelse(SampleDepthUnit %like% 'feet', 72, NA)),
+    mutate(SmplDepthUnitID = case_when(str_detect(SampleDepthUnit, regex("meters|m", ignore_case = TRUE)) ~ 146,
+                                       str_detect(SampleDepthUnit, regex("feet|ft", ignore_case = TRUE)) ~ 72,
+                                       TRUE ~ NA_real_),
            StartDateTimeZoneID = ifelse(dst(DateTime) == T,22, 23), # add mountain time
            EndDateTime = NA,
            EndDateTimeZoneID = NA,
