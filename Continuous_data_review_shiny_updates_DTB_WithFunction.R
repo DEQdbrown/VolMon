@@ -14,19 +14,19 @@ library(hms)
 # Accessibility Okay template
 analyst <- "Liz"
 
-setwd("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R")
+setwd("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2023/ODA/R")
 
-xlsx_input <- "WorkingCopy_ContDataSubTem3_Rogue_2020.xlsx"
+xlsx_input <- "WorkingCopy_CurrySWCD_ODA21-VOL-0029-SAP_2023.xlsx"
 
-output_dir <-"//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R/Output"
+output_dir <-"//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2023/ODA/R/Output"
 
-xlsx_pre_check_output <- "Curry_Rogue2020_PRECHECK.xlsx"
-shiny_output <- "Curry_Rogue2020_SHINY_CDR.Rdata"
-xlsx_output <- "Curry_Rogue2020_output_test.xlsx"
+xlsx_pre_check_output <- "Curry_ODA2023_PRECHECK_test.xlsx"
+shiny_output <- "Curry_ODA2023_SHINY_CDR.Rdata"
+xlsx_output <- "Curry_ODA2023_output_test.xlsx"
 
-changelog <-  'Curry_Rogue2020_changelog'
+changelog <-  'Curry_ODA2023_changelog'
 
-source("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2020-2022/cont/2020/Rogue/R/LB_Curry_2020_FUNCTION_Logger_Review_V1.R")
+source("//deqlab1/Vol_Data/Curry Watersheds Partnership (incl. South Coast-Lower Rogue)/2023/ODA/R/FUNCTION_Logger_Review_Curry_ODA_2023.R")
 
 # Read in the functions necessary for this script to run
 source("https://raw.githubusercontent.com/DEQdbrown/VolMon/refs/heads/main/cols_deploy_volmon_export.R")
@@ -399,9 +399,11 @@ odeqcdr::launch_shiny()
 df6.results <- odeqcdr::status_update(df5.results)
 df.audits.final <- odeqcdr::status_update(df4.audits.dql) |>
   rename(ActivityID = Activity.ID) |>
+  mutate(Project.ID = "ODEQVolMonWQProgram", "Alternate.Project.ID.1" = NA_real_, "Alternate.Project.ID.2" = NA_real_) |>
+  relocate(c(Project.ID, Alternate.Project.ID.1, Alternate.Project.ID.2), .before = Monitoring.Location.ID) |>
   relocate(Result.Value, .before = Result.Unit) |>
   select(-c(row.audits, tz_name, tz_wrong, audit.datetime.start, audit.datetime.end, 
-            Project.ID, Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
+            Logger.datetime, diff.minutes, Logger.Result.Value, diff.Result))
 
 #Output changelog
 
