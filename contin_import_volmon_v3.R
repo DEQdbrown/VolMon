@@ -42,7 +42,7 @@ contin_import_volmon_v3 <- function (file, sheets = c("Organization_Details", "P
            relocate(`Source Map Scale`, .before = `Monitoring Location Description`)
      }
      if ("Deployment" %in% sheets) {
-          deployment_import <- read_excel(xlsx_input,sheet = "Deployment") |>
+          deployment_import <- read_excel(file,sheet = "Deployment") |>
             rename_with(~ str_remove_all(.x, "[\\^\\*#]") |> str_trim()) |>
             rename_with(~ if_else(str_detect(.x, "^(Start|End) "),
                                   paste("Deployment", .x),
